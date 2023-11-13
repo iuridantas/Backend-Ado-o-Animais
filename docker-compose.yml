@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  database:
+    image: bitnami/postgresql
+    ports:
+      - '5432:5432'
+    container_name: Animaladoption
+    restart: always
+    volumes:
+      - Animaladoption-disk:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: Animaladoption
+
+volumes:
+  Animaladoption-disk:
