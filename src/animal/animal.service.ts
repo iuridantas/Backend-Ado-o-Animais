@@ -1,26 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
+import { AnimalRepository } from './animal.repository';
+import { randomUUID } from 'node:crypto';
+import { Animal } from './entities/animal.entity';
+import { AnimalStatus } from '@prisma/client';
 
 @Injectable()
 export class AnimalService {
-  create(createAnimalDto: CreateAnimalDto) {
-    return 'This action adds a new animal';
+  constructor(private readonly animalRepository: AnimalRepository) {}
+
+  async create(createAnimalDto: CreateAnimalDto): Promise<Animal> {
+    const id = randomUUID();
+    return await this.animalRepository.createAnimal({ ...createAnimalDto, id });
   }
 
-  findAll() {
-    return `This action returns all animal`;
+  async findAll(): Promise<Animal[]> {
+    return await this.animalRepository.findAllAnimals();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} animal`;
+  async findOne(id: string): Promise<Animal> {
+    return await this.animalRepository.findAnimalById(id);
   }
 
-  update(id: number, updateAnimalDto: UpdateAnimalDto) {
-    return `This action updates a #${id} animal`;
+  async update(updateAnimalDto: UpdateAnimalDto): Promise<Animal> {
+    return await this.animalRepository.updateAnimal(updateAnimalDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} animal`;
+  async remove(id: string): Promise<string> {
+    await this.animalRepository.deleteAnimal(id);
+    return 'Animal excluido com sucesso';
+  }
+
+  async updateStatus(id: string, newStatus: AnimalStatus): Promise<Animal> {
+    return await this.animalRepository.updateAnimalStatus(id, newStatus);
   }
 }

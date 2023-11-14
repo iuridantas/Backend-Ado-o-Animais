@@ -17,7 +17,7 @@ export class CreateAnimalDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  image: Buffer;
+  image: string;
 
   @ApiProperty()
   @IsString()

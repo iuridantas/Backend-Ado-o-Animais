@@ -9,7 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
 
   const config = new DocumentBuilder()
-    .setTitle('HyperLocal')
+    .setTitle('Adoção')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

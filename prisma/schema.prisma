@@ -11,7 +11,7 @@ datasource db {
 }
 
 enum AnimalStatus {
-  AVAILABLE
+      
   ADOPTED
 }
 
@@ -19,7 +19,7 @@ model Animal {
   id           String       @id @unique @default(uuid())
   name         String
   description  String
-  image        Bytes
+  image        String
   category     String
   creationDate DateTime     @default(now())
   status       AnimalStatus
