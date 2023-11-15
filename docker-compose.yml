@@ -2,17 +2,17 @@ version: '3'
 
 services:
   database:
-    image: bitnami/postgresql
+    image: mysql:latest
     ports:
-      - '5432:5432'
+      - '3306:3306'
     container_name: Animaladoption
-    restart: always
+    command: --default-authentication-plugin=mysql_native_password
     volumes:
-      - Animaladoption-disk:/var/lib/postgresql/data
+      - Animaladoption-disk:/var/lib/mysql
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: Animaladoption
+      MYSQL_USER: admin
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DB: animaladoption
 
 volumes:
   Animaladoption-disk:
