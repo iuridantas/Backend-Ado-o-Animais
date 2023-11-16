@@ -35,4 +35,22 @@ export class AnimalService {
   async updateStatus(id: string, newStatus: AnimalStatus): Promise<Animal> {
     return await this.animalRepository.updateAnimalStatus(id, newStatus);
   }
+
+  async findAllByTerm(term: string): Promise<Animal[]> {
+    return await this.animalRepository.findAllAnimalsByTerm(term);
+  }
+
+  async findAllByCategory(category: string): Promise<Animal[]> {
+    return await this.animalRepository.findAllAnimalsByCategory(category);
+  }
+
+  async findAllByStatus(status: AnimalStatus): Promise<Animal[]> {
+    return await this.animalRepository.findAllAnimalsByStatus(status);
+  }
+  
+  async findAllByCreationDate(creationDate: Date): Promise<Animal[]> {
+    return await this.animalRepository.findAllAnimalsByCreationDate(
+      creationDate,
+    );
+  }
 }

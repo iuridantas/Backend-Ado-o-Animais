@@ -81,4 +81,39 @@ export class AnimalController {
       HandleException(err);
     }
   }
+  @Get('/byTerm')
+  async findAllByTerm(@Query('term') term: string) {
+    try {
+      return this.animalService.findAllByTerm(term);
+    } catch (err) {
+      HandleException(err);
+    }
+  }
+
+  @Get('/byCategory')
+  async findAllByCategory(@Query('category') category: string) {
+    try {
+      return this.animalService.findAllByCategory(category);
+    } catch (err) {
+      HandleException(err);
+    }
+  }
+
+  @Get('/byStatus')
+  async findAllByStatus(@Query('status') status: AnimalStatus) {
+    try {
+      return this.animalService.findAllByStatus(status);
+    } catch (err) {
+      HandleException(err);
+    }
+  }
+
+  @Get('/byCreationDate')
+  async findAllByCreationDate(@Query('creationDate') creationDate: Date) {
+    try {
+      return this.animalService.findAllByCreationDate(new Date(creationDate));
+    } catch (err) {
+      HandleException(err);
+    }
+  }
 }

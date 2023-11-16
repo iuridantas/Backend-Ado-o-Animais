@@ -73,4 +73,52 @@ export class AnimalRepository {
       throw new Exception(Exceptions.DatabaseException);
     }
   }
+
+  async findAllAnimalsByTerm(term: string): Promise<Animal[]> {
+    try {
+      return await this.prisma.animal.findMany({
+        where: {
+          OR: [{ name: term }, { description: term }],
+        },
+      });
+    } catch (err) {
+      throw new Exception(Exceptions.DatabaseException);
+    }
+  }
+
+  async findAllAnimalsByCategory(category: string): Promise<Animal[]> {
+    try {
+      return await this.prisma.animal.findMany({
+        where: {
+          category: category,
+        },
+      });
+    } catch (err) {
+      throw new Exception(Exceptions.DatabaseException);
+    }
+  }
+
+  async findAllAnimalsByStatus(status: AnimalStatus): Promise<Animal[]> {
+    try {
+      return await this.prisma.animal.findMany({
+        where: {
+          status: status,
+        },
+      });
+    } catch (err) {
+      throw new Exception(Exceptions.DatabaseException);
+    }
+  }
+
+  async findAllAnimalsByCreationDate(creationDate: Date): Promise<Animal[]> {
+    try {
+      return await this.prisma.animal.findMany({
+        where: {
+          creationDate: { equals: creationDate },
+        },
+      });
+    } catch (err) {
+      throw new Exception(Exceptions.DatabaseException);
+    }
+  }
 }
