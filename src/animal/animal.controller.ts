@@ -109,9 +109,9 @@ export class AnimalController {
   }
 
   @Get('/byCreationDate')
-  async findAllByCreationDate(@Query('creationDate') creationDate: Date) {
+  async findAllByCreationDate(@Query('creationDate') creationDate: string) {
     try {
-      return this.animalService.findAllByCreationDate(new Date(creationDate));
+      return this.animalService.findAllByCreationDate(creationDate);
     } catch (err) {
       HandleException(err);
     }

@@ -5,6 +5,7 @@ import { Exceptions } from 'src/utils/exceptions/exceptionsHelper';
 import { Exception } from 'src/utils/exceptions/exception';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 import { AnimalStatus } from '@prisma/client';
+import { parse, isValid, startOfDay, endOfDay } from 'date-fns';
 
 @Injectable()
 export class AnimalRepository {
@@ -32,7 +33,7 @@ export class AnimalRepository {
   async deleteAnimal(id: string): Promise<Animal> {
     try {
       return await this.prisma.animal.delete({
-        where: { id: id },
+        where: { id },
       });
     } catch (err) {
       throw new Exception(
@@ -53,7 +54,7 @@ export class AnimalRepository {
   async findAnimalById(id: string): Promise<Animal> {
     try {
       return await this.prisma.animal.findUniqueOrThrow({
-        where: { id: id },
+        where: { id },
       });
     } catch (err) {
       throw new Exception(Exceptions.DatabaseException);
@@ -66,7 +67,7 @@ export class AnimalRepository {
   ): Promise<Animal> {
     try {
       return await this.prisma.animal.update({
-        where: { id: id },
+        where: { id },
         data: { status: newStatus },
       });
     } catch (err) {
@@ -78,7 +79,10 @@ export class AnimalRepository {
     try {
       return await this.prisma.animal.findMany({
         where: {
-          OR: [{ name: term }, { description: term }],
+          OR: [
+            { name: { contains: term } },
+            { description: { contains: term } },
+          ],
         },
       });
     } catch (err) {
@@ -89,9 +93,7 @@ export class AnimalRepository {
   async findAllAnimalsByCategory(category: string): Promise<Animal[]> {
     try {
       return await this.prisma.animal.findMany({
-        where: {
-          category: category,
-        },
+        where: { category },
       });
     } catch (err) {
       throw new Exception(Exceptions.DatabaseException);
@@ -101,24 +103,40 @@ export class AnimalRepository {
   async findAllAnimalsByStatus(status: AnimalStatus): Promise<Animal[]> {
     try {
       return await this.prisma.animal.findMany({
-        where: {
-          status: status,
-        },
+        where: { status },
       });
     } catch (err) {
       throw new Exception(Exceptions.DatabaseException);
     }
   }
 
-  async findAllAnimalsByCreationDate(creationDate: Date): Promise<Animal[]> {
+  async findAllAnimalsByCreationDate(
+    creationDateInput: string,
+  ): Promise<Animal[]> {
     try {
-      return await this.prisma.animal.findMany({
-        where: {
-          creationDate: { equals: creationDate },
-        },
-      });
+      const parsedDate =
+        this.parseDate(creationDateInput, 'yyyy/MM/dd') ||
+        this.parseDate(creationDateInput, 'dd/MM/yyyy');
+
+      return await this.findAnimalsByDateRange(parsedDate);
     } catch (err) {
       throw new Exception(Exceptions.DatabaseException);
     }
+  }
+
+  private parseDate(dateString: string, format: string): Date | null {
+    const parsedDate = parse(dateString, format, new Date());
+    return isValid(parsedDate) ? parsedDate : null;
+  }
+
+  private async findAnimalsByDateRange(creationDate: Date): Promise<Animal[]> {
+    const { gte, lte } = {
+      gte: startOfDay(creationDate),
+      lte: endOfDay(creationDate),
+    };
+
+    return await this.prisma.animal.findMany({
+      where: { creationDate: { gte, lte } },
+    });
   }
 }
