@@ -6,10 +6,17 @@ import { Exception } from 'src/utils/exceptions/exception';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 import { AnimalStatus } from '@prisma/client';
 import { parse, isValid, startOfDay, endOfDay } from 'date-fns';
+import { DogApi } from 'src/utils/API/partners/dogAPI.service';
+import { CatApi } from 'src/utils/API/partners/catAPI.service';
+
 
 @Injectable()
 export class AnimalRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly dogApiService: DogApi,
+    private readonly catApiService: CatApi,
+  ) {}
 
   async createAnimal(animal: Animal): Promise<Animal> {
     try {
@@ -138,5 +145,20 @@ export class AnimalRepository {
     return await this.prisma.animal.findMany({
       where: { creationDate: { gte, lte } },
     });
+  }
+
+  async indexAnimalsFromPartners(): Promise<void> {
+    try {
+      const dogs = await this.dogApiService.getDogs();
+      const cats = await this.catApiService.getCats();
+
+      const animalsToIndex = [...dogs, ...cats];
+
+      for (const animal of animalsToIndex) {
+        await this.createAnimal(animal);
+      }
+    } catch (err) {
+      throw new Exception(Exceptions.DatabaseException);
+    }
   }
 }

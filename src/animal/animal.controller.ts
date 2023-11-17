@@ -116,4 +116,14 @@ export class AnimalController {
       HandleException(err);
     }
   }
+
+  @Get('/indexFromPartners')
+  async indexAnimalsFromPartners() {
+    try {
+      await this.animalService.indexAnimalsFromPartners();
+      return 'Animals indexed from partners successfully';
+    } catch (err) {
+      HandleException(err);
+    }
+  }
 }

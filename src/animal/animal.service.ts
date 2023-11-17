@@ -47,10 +47,14 @@ export class AnimalService {
   async findAllByStatus(status: AnimalStatus): Promise<Animal[]> {
     return await this.animalRepository.findAllAnimalsByStatus(status);
   }
-  
+
   async findAllByCreationDate(creationDate: string): Promise<Animal[]> {
     return await this.animalRepository.findAllAnimalsByCreationDate(
       creationDate,
     );
+  }
+
+  async indexAnimalsFromPartners(): Promise<void> {
+    return await this.animalRepository.indexAnimalsFromPartners();
   }
 }
