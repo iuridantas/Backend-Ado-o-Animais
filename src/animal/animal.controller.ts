@@ -117,11 +117,28 @@ export class AnimalController {
     }
   }
 
-  @Get('/indexFromPartners')
-  async indexAnimalsFromPartners() {
+  @Get('/partner/dogs')
+  async findAllDogs() {
     try {
-      await this.animalService.indexAnimalsFromPartners();
-      return 'Animals indexed from partners successfully';
+      return this.animalService.findAllDogsFromExternalAPI();
+    } catch (err) {
+      HandleException(err);
+    }
+  }
+
+  @Get('/partner/cats')
+  async findAllCats() {
+    try {
+      return this.animalService.findAllCatsFromExternalAPI();
+    } catch (err) {
+      HandleException(err);
+    }
+  }
+
+  @Get('/allIncludingExternalData')
+  async findAllAnimalsIncludingExternalData() {
+    try {
+      return this.animalService.findAllAnimalsIncludingExternalData();
     } catch (err) {
       HandleException(err);
     }

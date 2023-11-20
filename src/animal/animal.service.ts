@@ -54,7 +54,15 @@ export class AnimalService {
     );
   }
 
-  async indexAnimalsFromPartners(): Promise<void> {
-    return await this.animalRepository.indexAnimalsFromPartners();
+  async findAllDogsFromExternalAPI(): Promise<Animal[]> {
+    return await this.animalRepository.findAllDogsFromExternalAPI();
+  }
+
+  async findAllCatsFromExternalAPI(): Promise<Animal[]> {
+    return await this.animalRepository.findAllCatsFromExternalAPI();
+  }
+
+  async findAllAnimalsIncludingExternalData(): Promise<Animal[]> {
+    return await this.animalRepository.findAllAnimalsIncludingExternalData();
   }
 }

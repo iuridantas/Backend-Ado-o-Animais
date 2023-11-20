@@ -6,9 +6,8 @@ import { Exception } from 'src/utils/exceptions/exception';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 import { AnimalStatus } from '@prisma/client';
 import { parse, isValid, startOfDay, endOfDay } from 'date-fns';
-import { DogApi } from 'src/utils/API/partners/dogAPI.service';
-import { CatApi } from 'src/utils/API/partners/catAPI.service';
-
+import { DogApi } from 'src/utils/API/service/DogApi.service';
+import { CatApi } from 'src/utils/API/service/CatApi.service';
 
 @Injectable()
 export class AnimalRepository {
@@ -147,17 +146,45 @@ export class AnimalRepository {
     });
   }
 
-  async indexAnimalsFromPartners(): Promise<void> {
+  async findAllDogsFromExternalAPI(): Promise<any[]> {
     try {
-      const dogs = await this.dogApiService.getDogs();
-      const cats = await this.catApiService.getCats();
+      const dogData = await this.dogApiService.getDogs();
 
-      const animalsToIndex = [...dogs, ...cats];
-
-      for (const animal of animalsToIndex) {
-        await this.createAnimal(animal);
-      }
+      return dogData;
     } catch (err) {
+      throw new Exception(
+        Exceptions.DatabaseException,
+        'Falha ao buscar dados do cachorro',
+      );
+    }
+  }
+
+  async findAllCatsFromExternalAPI(): Promise<any[]> {
+    try {
+      const catData = await this.catApiService.getCats();
+
+      return catData;
+    } catch (err) {
+      throw new Exception(
+        Exceptions.DatabaseException,
+        'Falha ao buscar dados do gato',
+      );
+    }
+  }
+
+  async findAllAnimalsIncludingExternalData(): Promise<Animal[]> {
+    try {
+      const animalsFromDatabase = await this.prisma.animal.findMany();
+      const dogsFromAPI = await this.findAllDogsFromExternalAPI();
+      const catsFromAPI = await this.findAllCatsFromExternalAPI();
+      const allAnimals = [
+        ...animalsFromDatabase,
+        ...dogsFromAPI,
+        ...catsFromAPI,
+      ];
+
+      return allAnimals;
+    } catch (error) {
       throw new Exception(Exceptions.DatabaseException);
     }
   }
