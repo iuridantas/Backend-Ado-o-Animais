@@ -83,7 +83,13 @@ export class AnimalRepository {
 
   async findAllAnimalsByTerm(term: string): Promise<Animal[]> {
     try {
-      return await this.prisma.animal.findMany({
+      const dogsFromAPI = await this.dogApiService.getDogs();
+      const catsFromAPI = await this.catApiService.getCats();
+
+      const filteredDogs = dogsFromAPI.filter((dog) => dog.name.includes(term));
+      const filteredCats = catsFromAPI.filter((cat) => cat.name.includes(term));
+
+      const animalsFromDatabase = await this.prisma.animal.findMany({
         where: {
           OR: [
             { name: { contains: term } },
@@ -91,40 +97,56 @@ export class AnimalRepository {
           ],
         },
       });
+
+      const allAnimals = [
+        ...animalsFromDatabase,
+        ...filteredDogs,
+        ...filteredCats,
+      ];
+
+      return allAnimals;
     } catch (err) {
       throw new Exception(Exceptions.DatabaseException);
     }
   }
 
-  async findAllAnimalsByCategory(category: string): Promise<Animal[]> {
-    try {
-      return await this.prisma.animal.findMany({
-        where: { category },
-      });
-    } catch (err) {
-      throw new Exception(Exceptions.DatabaseException);
-    }
+async findAllAnimalsByCategory(category: string): Promise<Animal[]> {
+  try {
+    const animalsFromDatabase = await this.prisma.animal.findMany({
+      where: { category },
+    });
+
+    const dogsFromAPI = await this.dogApiService.searchDogsByCategory(category);
+    const catsFromAPI = await this.catApiService.searchCatsByCategory(category);
+
+    const allAnimals = [
+      ...animalsFromDatabase,
+      ...dogsFromAPI,
+      ...catsFromAPI,
+    ];
+
+    return allAnimals;
+  } catch (err) {
+    throw new Exception(Exceptions.DatabaseException);
   }
+}
 
   async findAllAnimalsByStatus(status: AnimalStatus): Promise<Animal[]> {
     try {
-      return await this.prisma.animal.findMany({
+      const animalsFromDatabase = await this.prisma.animal.findMany({
         where: { status },
       });
-    } catch (err) {
-      throw new Exception(Exceptions.DatabaseException);
-    }
-  }
-
-  async findAllAnimalsByCreationDate(
-    creationDateInput: string,
-  ): Promise<Animal[]> {
-    try {
-      const parsedDate =
-        this.parseDate(creationDateInput, 'yyyy/MM/dd') ||
-        this.parseDate(creationDateInput, 'dd/MM/yyyy');
-
-      return await this.findAnimalsByDateRange(parsedDate);
+  
+      const dogsFromAPI = await this.dogApiService.searchDogsByStatus(status);
+      const catsFromAPI = await this.catApiService.searchCatsByStatus(status);
+  
+      const allAnimals = [
+        ...animalsFromDatabase,
+        ...dogsFromAPI,
+        ...catsFromAPI,
+      ];
+  
+      return allAnimals;
     } catch (err) {
       throw new Exception(Exceptions.DatabaseException);
     }
@@ -135,15 +157,34 @@ export class AnimalRepository {
     return isValid(parsedDate) ? parsedDate : null;
   }
 
-  private async findAnimalsByDateRange(creationDate: Date): Promise<Animal[]> {
-    const { gte, lte } = {
-      gte: startOfDay(creationDate),
-      lte: endOfDay(creationDate),
-    };
-
-    return await this.prisma.animal.findMany({
-      where: { creationDate: { gte, lte } },
-    });
+  async findAllAnimalsByCreationDate(creationDateInput: string): Promise<Animal[]> {
+    try {
+      const parsedDate =
+        this.parseDate(creationDateInput, 'yyyy/MM/dd') ||
+        this.parseDate(creationDateInput, 'dd/MM/yyyy');
+  
+      const { gte, lte } = {
+        gte: startOfDay(parsedDate),
+        lte: endOfDay(parsedDate),
+      };
+  
+      const animalsFromDatabase = await this.prisma.animal.findMany({
+        where: { creationDate: { gte, lte } },
+      });
+  
+      const dogsFromAPI = await this.dogApiService.searchDogsByCreationDate(parsedDate);
+      const catsFromAPI = await this.catApiService.searchCatsByCreationDate(parsedDate);
+  
+      const allAnimals = [
+        ...animalsFromDatabase,
+        ...dogsFromAPI,
+        ...catsFromAPI,
+      ];
+  
+      return allAnimals;
+    } catch (err) {
+      throw new Exception(Exceptions.DatabaseException);
+    }
   }
 
   async findAllDogsFromExternalAPI(): Promise<any[]> {

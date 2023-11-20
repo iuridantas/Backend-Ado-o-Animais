@@ -1,8 +1,12 @@
-import { Animal } from '@prisma/client';
+import { Animal, AnimalStatus } from '@prisma/client';
 import axios, { AxiosResponse } from 'axios';
 
 export interface DogApiService {
   getDogs(): Promise<Animal[]>;
+  searchDogsByTerm(term: string): Promise<Animal[]>;
+  searchDogsByCategory(category: string): Promise<Animal[]>;
+  searchDogsByStatus(status: AnimalStatus): Promise<Animal[]>;
+  searchDogsByCreationDate(creationDate: Date): Promise<Animal[]>;
 }
 
 export class DogApi implements DogApiService {
@@ -30,5 +34,34 @@ export class DogApi implements DogApiService {
       creationDate: dog.creationDate,
       status: dog.status,
     }));
+  }
+
+  async searchDogsByTerm(term: string): Promise<Animal[]> {
+    const allDogs = await this.getDogs();
+
+    return allDogs.filter(
+      (dog) => dog.name.includes(term) || dog.description.includes(term),
+    );
+  }
+
+  async searchDogsByCategory(category: string): Promise<Animal[]> {
+    const allDogs = await this.getDogs();
+
+    return allDogs.filter((dog) => dog.category === category);
+  }
+
+  async searchDogsByStatus(status: AnimalStatus): Promise<Animal[]> {
+    const allDogs = await this.getDogs();
+
+    return allDogs.filter((dog) => dog.status === status);
+  }
+
+  async searchDogsByCreationDate(creationDate: Date): Promise<Animal[]> {
+    const allDogs = await this.getDogs();
+
+    return allDogs.filter((dog) => {
+      const dogCreationDate = new Date(dog.creationDate);
+      return dogCreationDate.getTime() === creationDate.getTime();
+    });
   }
 }
