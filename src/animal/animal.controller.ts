@@ -8,19 +8,23 @@ import {
   Delete,
   BadRequestException,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AnimalService } from './animal.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { HandleException } from 'src/utils/exceptions/exceptionsHelper';
 import { AnimalStatus } from '@prisma/client';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('animals')
 @Controller('animal')
 export class AnimalController {
   constructor(private readonly animalService: AnimalService) {}
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Post('/create')
   async create(@Body() createAnimalDto: CreateAnimalDto) {
     try {
@@ -31,6 +35,8 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Get('/all')
   async findAll() {
     try {
@@ -40,6 +46,8 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Get('/find/:id')
   async findOne(@Param('id') id: string) {
     try {
@@ -49,6 +57,8 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Patch('/update')
   async update(@Body() updateAnimalDto: UpdateAnimalDto) {
     try {
@@ -58,6 +68,8 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Delete('delete/:id')
   async remove(@Param('id') id: string) {
     try {
@@ -67,20 +79,25 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Patch('/updateStatus/:id')
   async toggleStatus(@Param('id') id: string) {
     try {
       const animal = await this.animalService.findOne(id);
 
       const newStatus =
-        animal.status === AnimalStatus.AVAILABLE
-          ? AnimalStatus.ADOPTED
-          : AnimalStatus.AVAILABLE;
+        animal.status === AnimalStatus.available
+          ? AnimalStatus.adopted
+          : AnimalStatus.available;
       return this.animalService.updateStatus(id, newStatus);
     } catch (err) {
       HandleException(err);
     }
   }
+
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Get('/byTerm')
   async findAllByTerm(@Query('term') term: string) {
     try {
@@ -90,6 +107,8 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Get('/byCategory')
   async findAllByCategory(@Query('category') category: string) {
     try {
@@ -99,6 +118,8 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Get('/byStatus')
   async findAllByStatus(@Query('status') status: AnimalStatus) {
     try {
@@ -108,6 +129,8 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Get('/byCreationDate')
   async findAllByCreationDate(@Query('creationDate') creationDate: string) {
     try {
@@ -117,6 +140,8 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Get('/partner/dogs')
   async findAllDogs() {
     try {
@@ -126,6 +151,8 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Get('/partner/cats')
   async findAllCats() {
     try {
@@ -135,6 +162,8 @@ export class AnimalController {
     }
   }
 
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
   @Get('/allIncludingExternalData')
   async findAllAnimalsIncludingExternalData() {
     try {

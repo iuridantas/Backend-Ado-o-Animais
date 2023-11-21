@@ -24,7 +24,7 @@ export class AnimalRepository {
       throw new Exception(Exceptions.DatabaseException, 'Animal já cadastrado');
     }
   }
-
+  
   async updateAnimal(animal: UpdateAnimalDto): Promise<Animal> {
     try {
       return await this.prisma.animal.update({

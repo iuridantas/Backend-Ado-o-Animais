@@ -11,8 +11,18 @@ datasource db {
 }
 
 enum AnimalStatus {
-  AVAILABLE
-  ADOPTED
+  available
+  adopted
+}
+
+model User {
+  id           String       @id @unique @default(uuid())
+  name         String
+  password     String
+  email        String       @unique
+  cpf          String       @unique
+  creationDate DateTime     @default(now())
+  animals      AnimalUser[]
 }
 
 model Animal {
@@ -23,4 +33,13 @@ model Animal {
   category     String
   creationDate DateTime     @default(now())
   status       AnimalStatus
+  users        AnimalUser[]
+}
+
+model AnimalUser {
+  id       String @id @unique @default(uuid())
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+  animal   Animal @relation(fields: [animalId], references: [id])
+  animalId String
 }
