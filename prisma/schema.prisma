@@ -33,7 +33,8 @@ model Animal {
   category     String
   creationDate DateTime     @default(now())
   status       AnimalStatus
-  users        AnimalUser[]
+  users        AnimalUser[] 
+  userId       String
 }
 
 model AnimalUser {
@@ -42,4 +43,6 @@ model AnimalUser {
   userId   String
   animal   Animal @relation(fields: [animalId], references: [id])
   animalId String
+
+  @@unique([userId, animalId])
 }

@@ -4,7 +4,7 @@ import { Animal } from './entities/animal.entity';
 import { Exceptions } from 'src/utils/exceptions/exceptionsHelper';
 import { Exception } from 'src/utils/exceptions/exception';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
-import { AnimalStatus } from '@prisma/client';
+import { AnimalStatus, AnimalUser } from '@prisma/client';
 import { parse, isValid, startOfDay, endOfDay } from 'date-fns';
 import { DogApi } from 'src/utils/API/service/DogApi.service';
 import { CatApi } from 'src/utils/API/service/CatApi.service';
@@ -17,16 +17,39 @@ export class AnimalRepository {
     private readonly catApiService: CatApi,
   ) {}
 
-  async createAnimal(animal: Animal): Promise<Animal> {
+  async createAnimal(animal: Animal, userId: string): Promise<Animal> {
     try {
-      return await this.prisma.animal.create({ data: animal });
+      const createdAnimal = await this.prisma.animal.create({ data: animal });
+      await this.prisma.animalUser.create({
+        data: {
+          userId: userId,
+          animalId: createdAnimal.id,
+        },
+      });
+      return createdAnimal;
     } catch (err) {
       throw new Exception(Exceptions.DatabaseException, 'Animal já cadastrado');
     }
   }
-  
-  async updateAnimal(animal: UpdateAnimalDto): Promise<Animal> {
+
+  async updateAnimal(userId: string, animal: UpdateAnimalDto): Promise<Animal> {
     try {
+      const animalUser = await this.prisma.animalUser.findUnique({
+        where: {
+          userId_animalId: {
+            userId,
+            animalId: animal.id,
+          },
+        },
+      });
+
+      if (!animalUser) {
+        throw new Exception(
+          Exceptions.DatabaseException,
+          'Usuário não autorizado a atualizar este animal',
+        );
+      }
+
       return await this.prisma.animal.update({
         where: { id: animal.id },
         data: animal,
@@ -36,15 +59,39 @@ export class AnimalRepository {
     }
   }
 
-  async deleteAnimal(id: string): Promise<Animal> {
+  async deleteAnimal(userId: string, animalId: string): Promise<void> {
     try {
-      return await this.prisma.animal.delete({
-        where: { id },
+      const animalUser = await this.prisma.animalUser.findUnique({
+        where: {
+          userId_animalId: {
+            userId,
+            animalId,
+          },
+        },
+      });
+
+      if (!animalUser) {
+        throw new Exception(
+          Exceptions.DatabaseException,
+          'Usuário não autorizado a deletar este animal',
+        );
+      }
+
+      await this.prisma.animalUser.delete({
+        where: {
+          userId_animalId: {
+            userId,
+            animalId,
+          },
+        },
+      });
+      await this.prisma.animal.delete({
+        where: { id: animalId },
       });
     } catch (err) {
       throw new Exception(
         Exceptions.DatabaseException,
-        'Animal não encontrado',
+        'Animal não encontrado ou usuário não autorizado',
       );
     }
   }
@@ -52,6 +99,28 @@ export class AnimalRepository {
   async findAllAnimals(): Promise<Animal[]> {
     try {
       return await this.prisma.animal.findMany();
+    } catch (err) {
+      throw new Exception(Exceptions.DatabaseException);
+    }
+  }
+
+  async findAllAnimalsByUser(userId: string): Promise<Animal[]> {
+    try {
+      const userWithAnimals = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          animals: { include: { animal: true } },
+        },
+      });
+
+      if (!userWithAnimals) {
+        throw new Exception(
+          Exceptions.DatabaseException,
+          'Usuário não encontrado',
+        );
+      }
+
+      return userWithAnimals.animals.map(({ animal }) => animal);
     } catch (err) {
       throw new Exception(Exceptions.DatabaseException);
     }
@@ -68,12 +137,29 @@ export class AnimalRepository {
   }
 
   async updateAnimalStatus(
-    id: string,
+    userId: string,
+    animalId: string,
     newStatus: AnimalStatus,
   ): Promise<Animal> {
     try {
+      const animalUser = await this.prisma.animalUser.findUnique({
+        where: {
+          userId_animalId: {
+            userId,
+            animalId,
+          },
+        },
+      });
+
+      if (!animalUser) {
+        throw new Exception(
+          Exceptions.DatabaseException,
+          'Usuário não autorizado a atualizar o status deste animal',
+        );
+      }
+
       return await this.prisma.animal.update({
-        where: { id },
+        where: { id: animalId },
         data: { status: newStatus },
       });
     } catch (err) {
@@ -110,42 +196,46 @@ export class AnimalRepository {
     }
   }
 
-async findAllAnimalsByCategory(category: string): Promise<Animal[]> {
-  try {
-    const animalsFromDatabase = await this.prisma.animal.findMany({
-      where: { category },
-    });
+  async findAllAnimalsByCategory(category: string): Promise<Animal[]> {
+    try {
+      const animalsFromDatabase = await this.prisma.animal.findMany({
+        where: { category },
+      });
 
-    const dogsFromAPI = await this.dogApiService.searchDogsByCategory(category);
-    const catsFromAPI = await this.catApiService.searchCatsByCategory(category);
+      const dogsFromAPI = await this.dogApiService.searchDogsByCategory(
+        category,
+      );
+      const catsFromAPI = await this.catApiService.searchCatsByCategory(
+        category,
+      );
 
-    const allAnimals = [
-      ...animalsFromDatabase,
-      ...dogsFromAPI,
-      ...catsFromAPI,
-    ];
+      const allAnimals = [
+        ...animalsFromDatabase,
+        ...dogsFromAPI,
+        ...catsFromAPI,
+      ];
 
-    return allAnimals;
-  } catch (err) {
-    throw new Exception(Exceptions.DatabaseException);
+      return allAnimals;
+    } catch (err) {
+      throw new Exception(Exceptions.DatabaseException);
+    }
   }
-}
 
   async findAllAnimalsByStatus(status: AnimalStatus): Promise<Animal[]> {
     try {
       const animalsFromDatabase = await this.prisma.animal.findMany({
         where: { status },
       });
-  
+
       const dogsFromAPI = await this.dogApiService.searchDogsByStatus(status);
       const catsFromAPI = await this.catApiService.searchCatsByStatus(status);
-  
+
       const allAnimals = [
         ...animalsFromDatabase,
         ...dogsFromAPI,
         ...catsFromAPI,
       ];
-  
+
       return allAnimals;
     } catch (err) {
       throw new Exception(Exceptions.DatabaseException);
@@ -157,30 +247,36 @@ async findAllAnimalsByCategory(category: string): Promise<Animal[]> {
     return isValid(parsedDate) ? parsedDate : null;
   }
 
-  async findAllAnimalsByCreationDate(creationDateInput: string): Promise<Animal[]> {
+  async findAllAnimalsByCreationDate(
+    creationDateInput: string,
+  ): Promise<Animal[]> {
     try {
       const parsedDate =
         this.parseDate(creationDateInput, 'yyyy/MM/dd') ||
         this.parseDate(creationDateInput, 'dd/MM/yyyy');
-  
+
       const { gte, lte } = {
         gte: startOfDay(parsedDate),
         lte: endOfDay(parsedDate),
       };
-  
+
       const animalsFromDatabase = await this.prisma.animal.findMany({
         where: { creationDate: { gte, lte } },
       });
-  
-      const dogsFromAPI = await this.dogApiService.searchDogsByCreationDate(parsedDate);
-      const catsFromAPI = await this.catApiService.searchCatsByCreationDate(parsedDate);
-  
+
+      const dogsFromAPI = await this.dogApiService.searchDogsByCreationDate(
+        parsedDate,
+      );
+      const catsFromAPI = await this.catApiService.searchCatsByCreationDate(
+        parsedDate,
+      );
+
       const allAnimals = [
         ...animalsFromDatabase,
         ...dogsFromAPI,
         ...catsFromAPI,
       ];
-  
+
       return allAnimals;
     } catch (err) {
       throw new Exception(Exceptions.DatabaseException);

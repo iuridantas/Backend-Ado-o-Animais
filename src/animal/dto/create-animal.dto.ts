@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AnimalStatus } from '@prisma/client';
 import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
 
-
 export class CreateAnimalDto {
   @ApiProperty()
   @IsString()
@@ -18,6 +17,11 @@ export class CreateAnimalDto {
   @IsString()
   @IsNotEmpty()
   image: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
 
   @ApiProperty()
   @IsString()

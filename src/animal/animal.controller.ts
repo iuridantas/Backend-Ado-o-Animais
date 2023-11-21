@@ -9,6 +9,7 @@ import {
   BadRequestException,
   Query,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { AnimalService } from './animal.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
@@ -26,12 +27,25 @@ export class AnimalController {
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
   @Post('/create')
-  async create(@Body() createAnimalDto: CreateAnimalDto) {
+  async create(@Body() createAnimalDto: CreateAnimalDto, @Request() req) {
     try {
-      return this.animalService.create(createAnimalDto);
+      const userId = req.user.id;
+      return this.animalService.create(createAnimalDto, userId);
     } catch (err) {
       HandleException(err);
       throw new BadRequestException(err.message);
+    }
+  }
+
+  @UseGuards(AuthGuard())
+  @ApiBearerAuth()
+  @Get('/allUser')
+  async findAllByUser(@Request() req: any) {
+    try {
+      const currentUserId = req.user.id; 
+      return await this.animalService.findAllByUser(currentUserId);
+    } catch (err) {
+      HandleException(err);
     }
   }
 
@@ -60,9 +74,11 @@ export class AnimalController {
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
   @Patch('/update')
-  async update(@Body() updateAnimalDto: UpdateAnimalDto) {
+  async update(@Body() updateAnimalDto: UpdateAnimalDto, @Request() req) {
     try {
-      return this.animalService.update(updateAnimalDto);
+      const userId = req.user.id;
+
+      return this.animalService.update(userId, updateAnimalDto);
     } catch (err) {
       HandleException(err);
     }
@@ -71,9 +87,11 @@ export class AnimalController {
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
   @Delete('delete/:id')
-  async remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string, @Request() req) {
+    const userId = req.user.id;
+
     try {
-      return this.animalService.remove(id);
+      return this.animalService.remove(userId, id);
     } catch (err) {
       HandleException(err);
     }
@@ -82,15 +100,18 @@ export class AnimalController {
   @UseGuards(AuthGuard())
   @ApiBearerAuth()
   @Patch('/updateStatus/:id')
-  async toggleStatus(@Param('id') id: string) {
+  async toggleStatus(@Param('id') id: string, @Request() req) {
     try {
+      const userId = req.user.id;
+
       const animal = await this.animalService.findOne(id);
 
       const newStatus =
         animal.status === AnimalStatus.available
           ? AnimalStatus.adopted
           : AnimalStatus.available;
-      return this.animalService.updateStatus(id, newStatus);
+
+      return this.animalService.updateStatus(userId, id, newStatus);
     } catch (err) {
       HandleException(err);
     }

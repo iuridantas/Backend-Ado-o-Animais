@@ -10,30 +10,51 @@ import { AnimalStatus } from '@prisma/client';
 export class AnimalService {
   constructor(private readonly animalRepository: AnimalRepository) {}
 
-  async create(createAnimalDto: CreateAnimalDto): Promise<Animal> {
+  async create(
+    createAnimalDto: CreateAnimalDto,
+    userId: string,
+  ): Promise<Animal> {
     const id = randomUUID();
-    return await this.animalRepository.createAnimal({ ...createAnimalDto, id });
+    return await this.animalRepository.createAnimal(
+      { ...createAnimalDto, id },
+      userId,
+    );
   }
 
   async findAll(): Promise<Animal[]> {
     return await this.animalRepository.findAllAnimals();
   }
 
+  async findAllByUser(id: string): Promise<Animal[]> {
+    return await this.animalRepository.findAllAnimalsByUser(id);
+  }
+
   async findOne(id: string): Promise<Animal> {
     return await this.animalRepository.findAnimalById(id);
   }
 
-  async update(updateAnimalDto: UpdateAnimalDto): Promise<Animal> {
-    return await this.animalRepository.updateAnimal(updateAnimalDto);
+  async update(
+    userId: string,
+    updateAnimalDto: UpdateAnimalDto,
+  ): Promise<Animal> {
+    return await this.animalRepository.updateAnimal(userId, updateAnimalDto);
   }
 
-  async remove(id: string): Promise<string> {
-    await this.animalRepository.deleteAnimal(id);
-    return 'Animal excluido com sucesso';
+  async remove(userId: string, id: string): Promise<string> {
+    await this.animalRepository.deleteAnimal(userId, id);
+    return 'Animal excluído com sucesso';
   }
 
-  async updateStatus(id: string, newStatus: AnimalStatus): Promise<Animal> {
-    return await this.animalRepository.updateAnimalStatus(id, newStatus);
+  async updateStatus(
+    userId: string,
+    id: string,
+    newStatus: AnimalStatus,
+  ): Promise<Animal> {
+    return await this.animalRepository.updateAnimalStatus(
+      userId,
+      id,
+      newStatus,
+    );
   }
 
   async findAllByTerm(term: string): Promise<Animal[]> {

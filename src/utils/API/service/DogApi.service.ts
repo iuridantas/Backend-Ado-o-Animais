@@ -33,6 +33,7 @@ export class DogApi implements DogApiService {
       category: dog.category,
       creationDate: dog.creationDate,
       status: dog.status,
+      userId: dog.userId,
     }));
   }
 

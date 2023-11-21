@@ -33,6 +33,7 @@ export class CatApi implements CatApiService {
       category: cat.category,
       creationDate: cat.creationDate,
       status: cat.status,
+      userId: cat.userId,
     }));
   }
 
