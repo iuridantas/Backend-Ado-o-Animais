@@ -1,73 +1,264 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# animal Adoption Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This repository contains the backend API for a animal adoption platform. The API provides features for users to login, create new users, update their data, create animals for adoption, update their animal's data, update animal status, search for animals based on multiple parameters and import animals from third-party APIs.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Table of Contents
 
-## Description
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the Application](#running-the-application)
+  - [Running with Docker Compose](#Running-with-Docker-Compose)
+- [API Routes](#api-routes)
+  - [User Login](#user-login)
+  - [Create User](#create-user)
+  - [Create Animal](#Create-Animal)
+  - [Index Animals into Database](#index-animals-into-database)
+  - [Update Animal Status](#update-animal-status)
+  - [Get Animal Term](#get-animals-term)
+  - [Get Animal Category](#get-animals-category)
+  - [Get Animal Status](#get-animals-status)
+  - [Get Animal Creation Date](#get-animals-creationDate)
+- [Dependencies](#dependencies)
+- [License](#license)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Getting Started
 
-## Installation
+### Prerequisites
 
-```bash
-$ yarn install
-```
+Ensure that your machine is equipped with the necessary software by installing the following:
 
-## Running the app
+- [Node.js](https://nodejs.org/)
+- [yarn](https://yarnpkg.com)
 
-```bash
-# development
-$ yarn run start
+### Installation
 
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
-```
-
-## Test
+1. Clone the repository:
 
 ```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+git clone https://github.com/iuridantas/Backend-Adocao-Animais.git
 ```
 
-## Support
+2. Navigate to the project directory:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+cd Backend-Adocao-Animais
+```
 
-## Stay in touch
+3. Install dependencies:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+yarn
+```
+
+4. Fulfill the .env variables
+
+### Running with Docker Compose
+
+To run the application using Docker Compose, make sure you have Docker and Docker Compose installed. If you don't, you can install them by following the instructions at [Docker](https://docs.docker.com/get-docker/)
+
+1. Build the images and start the containers:
+
+```bash
+docker-compose up --build
+```
+
+This command will build Docker images and start containers based on the docker-compose.yml file.
+
+### Prisma Database Operations
+
+To perform Prisma-related database operations, follow these steps:
+
+1. Run Prisma migrations:
+
+```bash
+npx prisma migrate dev
+```
+
+This command applies any pending migrations.
+
+2. Push changes to the database:
+
+```bash
+npx prisma db push
+```
+
+Use this command to apply the changes to the database.
+
+3. Generate Prisma Client:
+
+```bash
+npx prisma generate
+```
+
+Run this command to generate the Prisma Client, which is used to interact with your database.
+
+### Running the Application
+
+Run the following command to start the application:
+
+```bash
+yarn start:dev
+```
+
+The API will be accessible at [http://localhost:3000](http://localhost:3000).
+
+## API Routes
+
+### User Login
+
+- **Endpoint:** `/auth/login`
+- **Method:** `POST`
+- **Description:** User login
+- **Request Body:**
+  ```json
+  {
+    "email": "string",
+    "password": "string"
+  }
+  ```
+- **Responses:**
+  - `200`: Successful login
+  - `400`: Bad request
+  - `500`: Internal server error
+
+### Create User
+
+- **Endpoint:** `/user/create`
+- **Method:** `POST`
+- **Description:** Create user
+- **Request Body:**
+  ```json
+  {
+    "name": "string",
+    "email": "string",
+    "cpf": "string",
+    "password": "string"
+  }
+  ```
+- **Responses:**
+
+  - `200`: Successful creation
+  - `400`: Bad request
+  - `500`: Internal server error
+
+### Create Animal
+
+- **Endpoint:** `/animal/create`
+- **Method:** `POST`
+- **Description:** Create animal
+- **Request Body:**
+
+```json
+{
+  "name": "string",
+  "description": "string",
+  "image": "string",
+  "userId": "string",
+  "category": "string",
+  "status": "available"
+}
+```
+
+- **Responses:**
+  - `200`: Successful creation
+  - `400`: Bad request
+  - `500`: Internal server error
+
+### Index animals into Database
+
+- **Endpoint:** `/animal/allIncludingExternalData`
+- **Method:** `GET`
+- **Description:** All animals into the database
+- **Security:** Bearer Token
+- **Responses:**
+  - `200`: Successful request
+  - `401`: Unauthorized
+  - `500`: Internal server error
+
+### Update animal Status
+
+- **Endpoint:** `/animal/updateStatus/{id}`
+- **Method:** `PATCH`
+- **Description:** Update animal status
+- **Security:** Bearer Token
+- **Parameters:**
+  - `animalId` (string)
+- **Responses:**
+  - `200`: Successful update
+  - `400`: Bad request
+  - `401`: Unauthorized
+  - `500`: Internal server error
+
+### Get Animal Term
+
+- **Endpoint:** `/animal/byTerm`
+- **Method:** `GET`
+- **Description:** Get pets by term(name or description)
+- **Parameters:**
+  - `term` (string)
+- **Responses:**
+
+  - `200`: Successful request
+  - `400`: Bad request
+  - `500`: Internal server error
+
+### Get Animal Category
+
+- **Endpoint:** `/animal/byCategory`
+- **Method:** `GET`
+- **Description:** Get pets by category(cat or dog)
+- **Parameters:**
+  - `category` (string)
+- **Responses:**
+  - `200`: Successful request
+  - `400`: Bad request
+  - `500`: Internal server error
+
+### Get Animal Status
+
+- **Endpoint:** `/animal/byStatus`
+- **Method:** `GET`
+- **Description:** Get pets by status(available or adopted)
+- **Parameters:**
+  - `status` (string)
+- **Responses:**
+  - `200`: Successful request
+  - `400`: Bad request
+  - `500`: Internal server error
+
+### Get Animal Creation Date
+
+- **Endpoint:** `/animal/byCreationDate`
+- **Method:** `GET`
+- **Description:** Get pets by creation date(yyyy/MM/dd or dd/MM/yyyy)
+- **Parameters:**
+  - `creation date` (string)
+- **Responses:**
+  - `200`: Successful request
+  - `400`: Bad request
+  - `500`: Internal server error
+
+## Dependencies
+
+- [axios](https://www.npmjs.com/package/axios) - Promise based HTTP client for the browser and node.js
+- [bcrypt](https://www.npmjs.com/package/bcrypt) - Library to help you hash passwords
+- [class-transformer](https://www.npmjs.com/package/class-transformer) - Proper decorator-based transformation / serialization / deserialization of plain javascript objects to class constructors
+- [class-validator](https://www.npmjs.com/package/class-validator) - Validation library for class-based application structures
+- [date-fns](https://www.npmjs.com/package/date-fns) - Modern JavaScript date utility library
+- [passport](https://www.npmjs.com/package/passport) - Simple, unobtrusive authentication for Node.js
+- [passport-jwt](https://www.npmjs.com/package/passport-jwt) - Passport authentication strategy using JSON Web Tokens
+- [reflect-metadata](https://www.npmjs.com/package/reflect-metadata) - Polyfill for the `Reflect` API
+- [rxjs](https://www.npmjs.com/package/rxjs) - Reactive Extensions for JavaScript
+- [@nestjs/common](https://www.npmjs.com/package/@nestjs/common) - Nest framework (common module)
+- [@nestjs/config](https://www.npmjs.com/package/@nestjs/config) - Configuration module for Nest framework
+- [@nestjs/core](https://www.npmjs.com/package/@nestjs/core) - Nest framework (core module)
+- [@nestjs/jwt](https://www.npmjs.com/package/@nestjs/jwt) - JWT utilities module for Nest framework
+- [@nestjs/passport](https://www.npmjs.com/package/@nestjs/passport) - Passport module for Nest framework
+- [@nestjs/platform-express](https://www.npmjs.com/package/@nestjs/platform-express) - Nest framework (Express adapter)
+- [@nestjs/swagger](https://www.npmjs.com/package/@nestjs/swagger) - Swagger module for Nest framework
+- [@prisma/client](https://www.npmjs.com/package/@prisma/client) - Prisma client for querying databases
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details.
